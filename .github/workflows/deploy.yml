@@ -69,7 +69,29 @@ jobs:
           ./scripts/deploy.sh ${{ github.event.inputs.environment || 'dev' }}
         env:
           AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
-
+           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          DEFAULT_AWS_REGION: ${{ secrets.DEFAULT_AWS_REGION }}
+          TF_VAR_aws_bedrock_base_url: ${{ secrets.AWS_BEDROCK_BASE_URL }}
+          TF_VAR_aws_region: ${{ secrets.DEFAULT_AWS_REGION }}
+          TF_VAR_project_id: ${{ secrets.PROJECT_ID }}
+          TF_VAR_project_name: ${{ secrets.PROJECT_NAME }}
+          TF_VAR_environment: ${{ github.event.inputs.environment || 'dev' }}
+          TF_VAR_bedrock_model_id: ${{ secrets.BEDROCK_MODEL_ID }}
+          TF_VAR_lambda_timeout: ${{ secrets.LAMBDA_TIMEOUT }}
+          TF_VAR_api_throttle_burst_limit: ${{ secrets.API_THROTTLE_BURST_LIMIT }}
+          TF_VAR_api_throttle_rate_limit: ${{ secrets.API_THROTTLE_RATE_LIMIT }}
+          TF_VAR_use_custom_domain: ${{ secrets.USE_CUSTOM_DOMAIN }}
+          TF_VAR_root_domain: ${{ secrets.ROOT_DOMAIN }}
+          TF_VAR_push_over_user: ${{ secrets.PUSH_OVER_USER }}
+          TF_VAR_push_over_token: ${{ secrets.PUSH_OVER_TOKEN }}
+          TF_VAR_email_smtp_server: ${{ secrets.EMAIL_SMTP_SERVER }}
+          TF_VAR_email_app_password: ${{ secrets.EMAIL_APP_PASSWORD }}
+          TF_VAR_email_address: ${{ secrets.EMAIL_ADDRESS }}
+          TF_VAR_github_mcp_token: ${{ secrets.MCP_GITHUB_TOKEN }}
+          TF_VAR_llm_model_id: ${{ secrets.LLM_MODEL_ID }}
+          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          TF_VAR_aws_region: ${{ secrets.DEFAULT_AWS_REGION }}
+          TF_VAR_use_s3: ${{ secrets.USE_S3 }}
       - name: Get Deployment URLs
         id: deploy_outputs
         working-directory: ./terraform
