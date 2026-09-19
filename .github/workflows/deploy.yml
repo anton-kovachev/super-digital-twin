@@ -33,6 +33,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          source-account-id: ${{ secrets.AWS_ACCOUNT_ID }}
           role-session-name: github-actions-deploy
           aws-region: ${{ secrets.DEFAULT_AWS_REGION }}
 
