@@ -69,7 +69,7 @@ jobs:
           ./scripts/deploy.sh ${{ github.event.inputs.environment || 'dev' }}
         env:
           AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
-           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           DEFAULT_AWS_REGION: ${{ secrets.DEFAULT_AWS_REGION }}
           TF_VAR_aws_bedrock_base_url: ${{ secrets.AWS_BEDROCK_BASE_URL }}
           TF_VAR_aws_region: ${{ secrets.DEFAULT_AWS_REGION }}
