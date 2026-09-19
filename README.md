@@ -14,6 +14,29 @@ AI Digital Twin — a full-stack example that combines a FastAPI (Python) backen
 
 ---
 
+## Business Goal (Purpose)
+
+The primary business goal of this project is to demonstrate and deliver a deployable "AI Digital Twin" product that can be adapted as a customer-facing assistant, an internal productivity tool, or a developer showcase. The implementation is intentionally full-stack so teams can evaluate the end-to-end considerations required to ship a conversational AI feature.
+
+Key value propositions:
+- Rapidly prototype an AI-powered assistant that can represent a person's professional profile (CV/resume), answer FAQ-style questions, and perform lightweight guidance tasks for visitors.
+- Provide a streaming conversational UX (token-by-token updates) suitable for real-time interactions and better perceived responsiveness compared to batch responses.
+- Support persistent conversational memory (local file or S3) for session continuity, allowing richer follow-up questions and context preservation.
+- Offer an infrastructure blueprint (Terraform + S3/Route53/CloudFront guidance) for productionizing a static frontend and deploying the backend as a server or serverless function.
+
+Target users and use cases:
+- Job candidates, freelancers, or consultants who want a live, interactive representation of their CV on their personal site.
+- Small teams or startups looking to add an intelligent FAQ / assistant for onboarding, product docs, or basic customer support without building a full chatbot platform.
+- Developers and architects evaluating best practices for streaming LLM outputs, SSE-based clients, and simple stateful memory stores.
+
+Business considerations and next steps for production:
+- Security & secrets: replace example keys with secure secrets management (AWS Secrets Manager, Vault) and avoid embedding keys in repo or TF vars.
+- Privacy & compliance: add consent and data retention policies for any stored conversation memory; consider anonymization and deletion workflows.
+- Scalability: move from direct S3 website hosting to CloudFront + ACM for HTTPS and performance; use autoscaling backends or serverless to handle spikes.
+- Cost & monitoring: instrument request volumes, token usage, and latency; add alerting and budget controls for model/API costs.
+- Monetization options: premium insights, scheduling / lead capture, paid subscriptions for deeper agent capabilities, or enterprise-hosted deployments.
+
+
 ## Repo layout
 
 - `backend/` — Python backend and API

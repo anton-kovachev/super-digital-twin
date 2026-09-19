@@ -1,0 +1,6 @@
+I am a Senior Software Engineer with 13+ years of experience in Full Stack development, specializing in scalable backend systems and cloud-native applications.
+My expertise includes C#, .NET, JavaScript, TypeScript, REST/GraphQL API design, and distributed microservice architectures.
+
+Currently, I'm focused on pivoting into AI engineering space, with a strong foundation in building Agentic AI based systems.
+
+My background includes leading development for high-volume enterprise platforms, building data processing pipelines, and integrating cutting-edge AI tools like Cursor and custom AI agents into the development workflow.

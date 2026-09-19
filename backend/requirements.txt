@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+openai
+python-dotenv
+python-multipart
+boto3
+pypdf
+mangum
+aws-bedrock-token-generator
+openai-agents
+pypdf

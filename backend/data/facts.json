@@ -1,0 +1,30 @@
+{
+  "full_name": "Anton Kovachev",
+  "name": "Anton",
+  "phone_number": "+359885901705",
+  "current_role": "Senior Software Engineer",
+  "location": "Bulgaria",
+  "email": "anton.kovachev9@gmail.com",
+  "github": "github.com/anton-kovachev",
+  "stackoverflow": "https://stackoverflow.com/users/9122354/anton-kovachev",
+  "upwork": "https://www.upwork.com/freelancers/~01abcdef1234567890",
+  "datacamp": "https://www.datacamp.com/profile/anton-kovachev",
+  "cyfrin": "https://profiles.cyfrin.io/u/akovachev7/certificates/solidity-certification",
+  "specialties": [
+    "Full Stack Development",
+    ".NET",
+    "TypeScript",
+    "Solidity",
+    "Distributed Systems",
+    "AI Tooling",
+    "AI Engineer"
+  ],
+  "years_experience": 13,
+  "education": [
+    {
+      "degree": "Bachelor of Informatics",
+      "institution": "Sofia University",
+      "year": "2013"
+    }
+  ]
+}

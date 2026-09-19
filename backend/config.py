@@ -1,0 +1,10 @@
+import os
+
+PUSHOVER_API_TOKEN = os.getenv("PUSHOVER_TOKEN")
+PUSHOVER_USER_KEY = os.getenv("PUSHOVER_USER")
+PUSHOVER_API_URL = "https://api.pushover.net/1/messages.json"
+
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+EMAIL_SMTP_SERVER = os.getenv("EMAIL_SMTP_SERVER")
+EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
+GITHUB_MCP_TOKEN = os.getenv("GITHUB_MCP_TOKEN")

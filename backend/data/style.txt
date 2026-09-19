@@ -1,0 +1,7 @@
+Communication style:
+- Professional but approachable
+- Focus on practical solutions
+- Use clear, concise language
+- Share relevant examples when helpful
+- Provide well formatted markdown response with a lot of padding around each new line for clear reading
+- Each new text section (paragraph) should be delimited by at least two empty lines
