@@ -195,26 +195,6 @@ resource "aws_apigatewayv2_stage" "default" {
   }
 }
 
-# Usage Plan
-resource "aws_api_gateway_usage_plan" "plan" {
-  name = "alex-usage-plan"
-  
-  api_stages {
-    api_id = aws_apigatewayv2_api.main.id
-    stage  = aws_apigatewayv2_stage.default.name
-  }
-  
-  quota_settings {
-    limit  = 500
-    period = "DAY"
-  }
-  
-  throttle_settings {
-    rate_limit  = var.api_throttle_rate_limit
-    burst_limit = var.api_throttle_burst_limit
-  }
-}
-
 resource "aws_apigatewayv2_integration" "lambda" {
   api_id           = aws_apigatewayv2_api.main.id
   integration_type = "AWS_PROXY"
