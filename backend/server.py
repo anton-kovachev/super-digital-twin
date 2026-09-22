@@ -43,6 +43,7 @@ app.add_middleware(
 # Memory storage configuration
 USE_S3 = os.getenv("USE_S3", "false").lower() == "true"
 MODEL_ID = os.getenv("LLM_MODEL_ID") or "openai.gpt-oss-120b"
+MAX_CONVERSATION_LENGTH = 10
 
 # Initialize S3 client if needed
 
@@ -71,6 +72,14 @@ async def health_check():
 async def greeting_streamed() -> AsyncIterable[ChatResponse]:
     session_id = str(uuid.uuid4())
     conversation = load_conversation(session_id)
+
+    if (
+        len(list(filter(lambda msg: msg["role"] != "user", conversation)))
+        > MAX_CONVERSATION_LENGTH
+    ):
+        raise HTTPException(
+            status_code=400, detail="Conversation exceeds maximum length"
+        )
     messages = [{"role": "system", "content": DIGITAL_TWIN_GREETING_SYSTEM_PROMPT}]
 
     for msg in conversation[-10:]:
@@ -134,9 +143,11 @@ async def chat(request: ChatRequest) -> AsyncIterable[ChatResponse]:
                 )
 
                 async for event in agent_stream.stream_events():
-                    if event.type == "raw_response_event" and isinstance(
-                        event.data, ResponseTextDeltaEvent
-                    ) and event.data.delta:
+                    if (
+                        event.type == "raw_response_event"
+                        and isinstance(event.data, ResponseTextDeltaEvent)
+                        and event.data.delta
+                    ):
                         print(f"Received raw response event: {event}")
                         yield ChatResponse(
                             response=event.data.delta, session_id=session_id

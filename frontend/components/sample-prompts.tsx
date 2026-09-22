@@ -13,7 +13,6 @@ export default function SamplePrompts({
   useEffect(() => {
     const fetchSamplePrompts = async () => {
       try {
-        debugger;
         const response = await fetch(`${baseUrl}/sample-prompts`);
         if (!response.ok) throw new Error("Failed to fetch sample prompts");
         const data = await response.json();

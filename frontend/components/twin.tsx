@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Send, Bot, User } from "lucide-react";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import MarkdownPreview from "./markdown-preview";
@@ -58,7 +58,6 @@ export default function Twin() {
           },
           onmessage: (event) => {
             try {
-              debugger;
               const data = JSON.parse(event.data);
               const delta = data.response || "";
               const sid = data.session_id;
@@ -119,106 +118,109 @@ export default function Twin() {
     scrollToBottom();
   }, [messages]);
 
-  const sendMessage = async (prompt: string | null | undefined) => {
-    if (!prompt && (!input.trim() || isLoading)) return;
+  const sendMessage = useCallback(
+    async (prompt: string | null | undefined) => {
+      if (!prompt && (!input.trim() || isLoading)) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: prompt ?? input.trim(),
-      timestamp: new Date(),
-    };
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: "user",
+        content: prompt ?? input.trim(),
+        timestamp: new Date(),
+      };
 
-    setMessages((prev) => [...prev, userMessage]);
+      setMessages((prev) => [...prev, userMessage]);
 
-    if (!prompt) {
-      setInput("");
-    }
+      if (!prompt) {
+        setInput("");
+      }
 
-    try {
-      await fetchEventSource(`${baseUrl}/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: userMessage.content,
-          session_id: sessionId || undefined,
-        }),
-        onopen: async (response) => {
-          setIsLoading(true);
-          // add an empty assistant message to accumulate deltas
-          const assistantMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: "assistant",
-            content: "",
-            timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, assistantMessage]);
-        },
-        onmessage: (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            const delta = data.response || "";
-            const sid = data.session_id;
-            if (sid && !sessionId) setSessionId(sid);
-
-            setMessages((prev) => {
-              const last = prev[prev.length - 1];
-              if (last && last.role === "assistant") {
-                return [
-                  ...prev.slice(0, -1),
-                  {
-                    ...last,
-                    content: last.content + delta,
-                    timestamp: new Date(),
-                  },
-                ];
-              }
-              const assistantMessage: Message = {
-                id: (Date.now() + 1).toString(),
-                role: "assistant",
-                content: delta,
-                timestamp: new Date(),
-              };
-              return [...prev, assistantMessage];
-            });
-          } catch (err) {
-            console.error("Failed to parse SSE event data", err);
-          }
-        },
-        onclose: () => {
-          setIsLoading(false);
-          setTimeout(() => inputRef.current?.focus(), 100);
-        },
-        onerror: (err) => {
-          console.error("SSE error:", err);
-          setIsLoading(false);
-          setMessages((prev) => [
-            ...prev,
-            {
+      try {
+        await fetchEventSource(`${baseUrl}/chat`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: userMessage.content,
+            session_id: sessionId || undefined,
+          }),
+          onopen: async (response) => {
+            setIsLoading(true);
+            // add an empty assistant message to accumulate deltas
+            const assistantMessage: Message = {
               id: (Date.now() + 1).toString(),
               role: "assistant",
-              content: "Sorry, I encountered an error. Please try again.",
+              content: "",
               timestamp: new Date(),
-            },
-          ]);
-        },
-      });
-    } catch (error) {
-      console.error("Error using fetchEventSource:", error);
-      setIsLoading(false);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
-          timestamp: new Date(),
-        },
-      ]);
-    }
-  };
+            };
+            setMessages((prev) => [...prev, assistantMessage]);
+          },
+          onmessage: (event) => {
+            try {
+              const data = JSON.parse(event.data);
+              const delta = data.response || "";
+              const sid = data.session_id;
+              if (sid && !sessionId) setSessionId(sid);
+
+              setMessages((prev) => {
+                const last = prev[prev.length - 1];
+                if (last && last.role === "assistant") {
+                  return [
+                    ...prev.slice(0, -1),
+                    {
+                      ...last,
+                      content: last.content + delta,
+                      timestamp: new Date(),
+                    },
+                  ];
+                }
+                const assistantMessage: Message = {
+                  id: (Date.now() + 1).toString(),
+                  role: "assistant",
+                  content: delta,
+                  timestamp: new Date(),
+                };
+                return [...prev, assistantMessage];
+              });
+            } catch (err) {
+              console.error("Failed to parse SSE event data", err);
+            }
+          },
+          onclose: () => {
+            setIsLoading(false);
+            setTimeout(() => inputRef.current?.focus(), 100);
+          },
+          onerror: (err) => {
+            console.error("SSE error:", err);
+            setIsLoading(false);
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: (Date.now() + 1).toString(),
+                role: "assistant",
+                content: "Sorry, I encountered an error. Please try again.",
+                timestamp: new Date(),
+              },
+            ]);
+          },
+        });
+      } catch (error) {
+        console.error("Error using fetchEventSource:", error);
+        setIsLoading(false);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: "Sorry, I encountered an error. Please try again.",
+            timestamp: new Date(),
+          },
+        ]);
+      }
+    },
+    [input],
+  );
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -399,7 +401,7 @@ export default function Twin() {
           <div className="">
             <button
               onClick={handleDownloadClick}
-              className="w-full px-4 py-2 bg-gradient-to-r from-slate-700 to-slate-800 border border-gray-300 rounded-lg text-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-slate-600"
+              className="w-full px-4 py-2 bg-gradient-to-r from-slate-700 to-slate-800 border border-gray-300 rounded-lg text-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-slate-600 hover:cursor-pointer"
             >
               Download My CV
             </button>

@@ -86,6 +86,8 @@ EXAMPLES = [
     "When and where did you study?",
     "What professional certifications do you hold?",
     "How can I get in touch with you?",
+    "What kind of projects are you interested in?",
     "Can I review your CV?",
+    "What is the weather today?",
     "Contacts",
 ]

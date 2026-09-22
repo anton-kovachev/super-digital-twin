@@ -3,7 +3,7 @@
 aws_bedrock_base_url = "https://bedrock-mantle.eu-north-1.api.aws/v1"
 default_aws_region   = "eu-north-1"
 project_id           = "PROJECT_ID_PLACEHOLDER"
-project_name         = "twin"
+project_name         = "{your-name-here}-digital-twin"
 environment          = "dev"
 bedrock_model_id     = "amazon.nova-micro-v1:0"
 lambda_timeout       = 300
