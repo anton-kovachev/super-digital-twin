@@ -63,6 +63,7 @@ def main():
         "config.py",
         "tools.py",
         "mcp_servers.py",
+        "guardrails.py",
     ]:
         if os.path.exists(file):
             shutil.copy2(file, "lambda-package/")
