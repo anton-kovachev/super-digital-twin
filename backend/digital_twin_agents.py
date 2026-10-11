@@ -1,24 +1,29 @@
 import os
 from dotenv import load_dotenv
-from ctypes import cast
 
 load_dotenv(override=True)
 
-from agents import Agent, OpenAIChatCompletionsModel
-from context import (
-    DIGITAL_TWIN_SYSTEM_PROMPT,
-    EMAIL_SENDER_SYSTEM_PROMPT,
-    FRIENDLY_EMAIL_WRITER_INTRO_SYSTEM_PROMPT,
-    PROFESSIONAL_EMAIL_WRITER_INTRO_SYSTEM_PROMPT,
-    GITHUB_RESEARCH_AGENT_SYSTEM_PROMPT,
+from agents import (
+    Agent,
+    OpenAIChatCompletionsModel,
 )
-from openai import AsyncOpenAI
-from tools import push_message, send_email, get_cv_pdf
-
-from mcp_servers import github_mcp_server
 
 # from mcp_tools import github_mcp_tool
 from aws_bedrock_token_generator import provide_token
+from context import (
+    DIGITAL_TWIN_INPUT_MODERATION_SYSTEM_PROMPT,
+    DIGITAL_TWIN_SYSTEM_PROMPT,
+    EMAIL_SENDER_SYSTEM_PROMPT,
+    FRIENDLY_EMAIL_WRITER_INTRO_SYSTEM_PROMPT,
+    GITHUB_RESEARCH_AGENT_SYSTEM_PROMPT,
+    PROFESSIONAL_EMAIL_WRITER_INTRO_SYSTEM_PROMPT,
+)
+from mcp_servers import github_mcp_server
+from models import ModerationResult
+from openai import AsyncOpenAI
+from tools import get_cv_pdf, push_message, send_email
+
+from guardrails import get_digital_twin_agent_guardrails
 
 MODEL_NAME = os.getenv("LLM_MODEL_ID") or "openai.gpt-oss-120b"
 
@@ -28,11 +33,19 @@ async_aws_bedrock_client = AsyncOpenAI(
     project=os.getenv("PROJECT_ID"),
 )
 
-
 model = OpenAIChatCompletionsModel(
     model=MODEL_NAME,
     openai_client=async_aws_bedrock_client,
 )
+
+
+input_moderation_agent = Agent(
+    name="Input Moderation",
+    instructions=DIGITAL_TWIN_INPUT_MODERATION_SYSTEM_PROMPT,
+    model=model,
+    output_type=ModerationResult,
+)
+
 
 professional_email_writer_agent = Agent(
     name="Professional Email Writer",
@@ -92,4 +105,5 @@ digital_twin_agent = Agent(
     instructions=DIGITAL_TWIN_SYSTEM_PROMPT,
     model=model,
     tools=digital_twin_agent_tools,
+    input_guardrails=get_digital_twin_agent_guardrails(input_moderation_agent),
 )

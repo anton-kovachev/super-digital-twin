@@ -31,6 +31,10 @@ cv += read_cv_pdf("./public/anton_kovachev_cv.pdf")
 with open("./data/summary.txt", "r", encoding="utf-8") as f:
     summary = f.read()
 
+DIGITAL_TWIN_INPUT_MODERATION_SYSTEM_PROMPT = read_prompt_file(
+    "digital_twin_input_moderation_system_prompt.md"
+)
+
 # Load system prompts from markdown files
 DIGITAL_TWIN_GREETING_SYSTEM_PROMPT = read_prompt_file(
     "digital_twin_greeting_system_prompt.md"

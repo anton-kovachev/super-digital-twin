@@ -1,29 +1,34 @@
 import os
 import uuid
-from datetime import datetime
 from collections.abc import AsyncIterable
+from contextlib import AsyncExitStack
+from datetime import datetime
+
+from agents import (
+    InputGuardrailTripwireTriggered,
+    ModelSettings,
+    RunConfig,
+    Runner,
+    trace,
+)
+from aws_bedrock_token_generator import provide_token
+from context import DIGITAL_TWIN_GREETING_SYSTEM_PROMPT, EXAMPLES
+from digital_twin_agents import digital_twin_agent
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.sse import EventSourceResponse
-from pydantic import BaseModel
-from typing import List, Dict
-from openai import OpenAI
-from openai.types.responses import ResponseTextDeltaEvent, ResponseCompletedEvent
-from dotenv import load_dotenv
-from aws_bedrock_token_generator import provide_token
-
-from agents import Runner, RunConfig, ModelSettings, trace
-from digital_twin_agents import digital_twin_agent
 from mcp_servers import github_mcp_server
-from models import ChatRequest, ChatResponse
-from context import DIGITAL_TWIN_GREETING_SYSTEM_PROMPT, EXAMPLES
+from models import ChatRequest, ChatResponse, ModerationResult
+from openai import OpenAI
+from openai.types.responses import ResponseCompletedEvent, ResponseTextDeltaEvent
+from pydantic import BaseModel
 from utils import (
+    append_and_save_conversation_pair,
     load_conversation,
     save_conversation,
-    append_and_save_conversation_pair,
 )
-from contextlib import AsyncExitStack
 
 # Load environment variables
 load_dotenv()
@@ -135,30 +140,55 @@ async def chat(request: ChatRequest) -> AsyncIterable[ChatResponse]:
             # async with github_mcp_server:
             async with AsyncExitStack() as stack:
                 await stack.enter_async_context(github_mcp_server)
-                agent_stream = Runner.run_streamed(
-                    digital_twin_agent,
-                    input=messages,
-                    max_turns=10,
-                    run_config=RunConfig(model_settings=ModelSettings(temperature=0.7)),
-                )
 
-                async for event in agent_stream.stream_events():
-                    if (
-                        event.type == "raw_response_event"
-                        and isinstance(event.data, ResponseTextDeltaEvent)
-                        and event.data.delta
-                    ):
-                        print(f"Received raw response event: {event}")
-                        yield ChatResponse(
-                            response=event.data.delta, session_id=session_id
+                assistant_response: str | None = None
+                try:
+                    agent_stream = Runner.run_streamed(
+                        digital_twin_agent,
+                        input=messages,
+                        max_turns=10,
+                        run_config=RunConfig(
+                            model_settings=ModelSettings(temperature=0.7)
+                        ),
+                    )
+                    async for event in agent_stream.stream_events():
+                        if (
+                            event.type == "raw_response_event"
+                            and isinstance(event.data, ResponseTextDeltaEvent)
+                            and event.data.delta
+                        ):
+                            print(f"Received raw response event: {event}")
+                            yield ChatResponse(
+                                response=event.data.delta, session_id=session_id
+                            )
+                        elif event.type == "response_completed_event" and isinstance(
+                            event.data, ResponseCompletedEvent
+                        ):
+                            assistant_response = event.data.response.output_text
+                except InputGuardrailTripwireTriggered as guardrail_trigger:
+                    moderation_result = (
+                        guardrail_trigger.guardrail_result.output.output_info
+                    )
+                    if not isinstance(moderation_result, ModerationResult):
+                        raise TypeError(
+                            "Input guardrail did not provide a ModerationResult"
                         )
-                    elif event.type == "response_completed_event" and isinstance(
-                        event.data, ResponseCompletedEvent
-                    ):
+                    if not moderation_result.reason:
+                        raise ValueError(
+                            "Input guardrail triggered without a moderation reason"
+                        )
+
+                    assistant_response = moderation_result.reason
+                    yield ChatResponse(
+                        response=assistant_response,
+                        session_id=session_id,
+                    )
+                finally:
+                    if assistant_response is not None:
                         append_and_save_conversation_pair(
                             conversation,
                             request.message,
-                            event.data.response.output_text,
+                            assistant_response,
                             session_id=session_id,
                         )
     except Exception as e:
