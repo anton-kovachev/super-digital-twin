@@ -87,7 +87,7 @@ EXAMPLES = [
     "What kinds of projects did you worked on in the past?",
     "What are your strongest technical skills?",
     "Do you have any experience in leading a team and mentoring people?",
-    "When and where did you study?",
+    "Do you have any Agentic AI experience?",
     "What professional certifications do you hold?",
     "How can I get in touch with you?",
     "What kind of projects are you interested in?",
